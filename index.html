@@ -15,11 +15,21 @@
       </div>
       <section id="qr-section" class="qr-section" hidden>
         <div class="qr-output">
-          <div class="color-control">
-            <span class="color-label">change the color</span>
-            <input id="color-picker" type="color" value="#ffffff" aria-label="QR background color" />
+          <div class="side-controls">
+            <div class="color-control">
+              <span class="color-label">change the color</span>
+              <input id="color-picker" type="color" value="#ffffff" aria-label="QR background color" />
+            </div>
           </div>
           <canvas id="qr-canvas" width="1200" height="1200" aria-label="Generated QR code"></canvas>
+          <div class="logo-control">
+            <div class="logo-row">
+              <span class="color-label">center image</span>
+              <input id="logo-input" type="file" accept="image/*" aria-label="Upload center image" />
+              <button id="logo-remove-btn" type="button">Remove</button>
+            </div>
+            <span id="logo-status" class="logo-status" aria-live="polite"></span>
+          </div>
         </div>
         <div class="qr-actions">
           <button id="download-btn" type="button">Download</button>
