@@ -14,9 +14,10 @@
 
   const OUTPUT_SIZE = 1200;
   const BARCODE_WIDTH = 1200;
-  const BARCODE_HEIGHT = 600;
   const BARCODE_LINE_HEIGHT = 360;
-  const BARCODE_MARGIN = 48;
+  const BARCODE_MARGIN = 16;
+  const BARCODE_HEIGHT = BARCODE_LINE_HEIGHT + BARCODE_MARGIN * 2;
+  const BARCODE_HEIGHT_SCALE = BARCODE_HEIGHT / BARCODE_WIDTH;
   const ERROR_CORRECTION = "H";
   const DEFAULT_BACKGROUND = "#fff";
   const DARK_COLOR = "#000";
@@ -32,6 +33,7 @@
   let currentMode = MODES.QR;
 
   logoRemoveBtn.disabled = true;
+  app.style.setProperty("--barcode-height-scale", BARCODE_HEIGHT_SCALE.toString());
 
   const setStatus = (message) => {
     outputStatus.textContent = message;
