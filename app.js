@@ -16,6 +16,7 @@
   const BARCODE_WIDTH = 1200;
   const BARCODE_HEIGHT = 600;
   const BARCODE_LINE_HEIGHT = 360;
+  const BARCODE_MARGIN = 48;
   const ERROR_CORRECTION = "H";
   const DEFAULT_BACKGROUND = "#fff";
   const DARK_COLOR = "#000";
@@ -138,12 +139,14 @@
     canvas.width = BARCODE_WIDTH;
     canvas.height = BARCODE_HEIGHT;
     ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = DEFAULT_BACKGROUND;
+    ctx.fillRect(0, 0, BARCODE_WIDTH, BARCODE_HEIGHT);
 
     try {
       JsBarcode(canvas, text, {
         format: "CODE128",
         displayValue: false,
-        margin: 0,
+        margin: BARCODE_MARGIN,
         background: DEFAULT_BACKGROUND,
         lineColor: DARK_COLOR,
         width: 2,
