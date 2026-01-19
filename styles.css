@@ -2,6 +2,7 @@
   --yellow: #ff0;
   --black: #000;
   --display-size: clamp(220px, 60vw, 360px);
+  --barcode-height-scale: 0.5;
 }
 
 *,
@@ -33,6 +34,29 @@ body {
   gap: 28px;
 }
 
+.mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  animation: rise 700ms ease-out 60ms both;
+}
+
+.mode-btn {
+  background: transparent;
+  color: var(--yellow);
+  border: 1px solid rgba(255, 255, 0, 0.6);
+  box-shadow: none;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+}
+
+.mode-btn.is-active {
+  background: linear-gradient(135deg, #ffe65a 0%, #ffca1f 50%, #ffb400 100%);
+  color: #000;
+  border-color: rgba(255, 255, 0, 0.9);
+  box-shadow: 0 12px 26px rgba(255, 255, 0, 0.2);
+}
+
 h1 {
   margin: 0;
   font-size: clamp(2rem, 5vw, 3.5rem);
@@ -52,6 +76,18 @@ h1 {
   flex-direction: column;
   gap: 12px;
   animation: rise 700ms ease-out 120ms both;
+}
+
+.output-status {
+  min-height: 20px;
+  margin: 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.output-status[hidden] {
+  display: none;
 }
 
 #qr-input {
@@ -251,6 +287,21 @@ button:focus-visible {
   box-shadow: 0 16px 48px rgba(255, 255, 0, 0.15);
 }
 
+.app.is-barcode .qr-output {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.app.is-barcode #qr-canvas {
+  grid-column: 1;
+  height: calc(var(--display-size) * var(--barcode-height-scale));
+}
+
+.app.is-barcode .side-controls,
+.app.is-barcode .logo-control {
+  display: none;
+}
+
 .qr-actions {
   display: flex;
   align-items: center;
@@ -309,7 +360,9 @@ button:focus-visible {
   }
 
   h1,
+  .mode-toggle,
   .controls,
+  .output-status,
   .qr-actions,
   .side-controls,
   #color-picker,

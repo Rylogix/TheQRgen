@@ -8,11 +8,20 @@
   </head>
   <body>
     <main class="app">
+      <div class="mode-toggle" role="group" aria-label="Select code type">
+        <button class="mode-btn is-active" type="button" data-mode="qr" aria-pressed="true">
+          QR Code
+        </button>
+        <button class="mode-btn" type="button" data-mode="barcode" aria-pressed="false">
+          Barcode
+        </button>
+      </div>
       <h1>100% Free and no data saved</h1>
       <div class="controls">
         <input id="qr-input" type="text" autocomplete="off" placeholder=" Type anything here.." aria-label="QR content" />
         <button id="generate-btn" type="button">Generate</button>
       </div>
+      <p id="output-status" class="output-status" aria-live="polite" hidden></p>
       <section id="qr-section" class="qr-section" hidden>
         <div class="qr-output">
           <div class="side-controls">
@@ -37,6 +46,7 @@
       </section>
     </main>
     <script src="lib/qrcode.min.js"></script>
+    <script src="lib/JsBarcode.all.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

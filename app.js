@@ -1,4 +1,6 @@
 (() => {
+  const app = document.querySelector(".app");
+  const modeButtons = document.querySelectorAll("[data-mode]");
   const input = document.getElementById("qr-input");
   const generateBtn = document.getElementById("generate-btn");
   const downloadBtn = document.getElementById("download-btn");
@@ -6,27 +8,41 @@
   const logoInput = document.getElementById("logo-input");
   const logoStatus = document.getElementById("logo-status");
   const logoRemoveBtn = document.getElementById("logo-remove-btn");
+  const outputStatus = document.getElementById("output-status");
   const section = document.getElementById("qr-section");
   const canvas = document.getElementById("qr-canvas");
 
   const OUTPUT_SIZE = 1200;
+  const BARCODE_WIDTH = 1200;
+  const BARCODE_HEIGHT = 600;
+  const BARCODE_LINE_HEIGHT = 360;
   const ERROR_CORRECTION = "H";
   const DEFAULT_BACKGROUND = "#fff";
   const DARK_COLOR = "#000";
   const BORDER_MODULES = 1;
   const LOGO_SCALE = 0.18;
   const LOGO_PADDING = 0.18;
+  const MODES = {
+    QR: "qr",
+    BARCODE: "barcode",
+  };
   let lastText = "";
   let logoImage = null;
+  let currentMode = MODES.QR;
 
   logoRemoveBtn.disabled = true;
+
+  const setStatus = (message) => {
+    outputStatus.textContent = message;
+    outputStatus.hidden = !message;
+  };
 
   const clearLogo = () => {
     logoImage = null;
     logoInput.value = "";
     logoStatus.textContent = "";
     logoRemoveBtn.disabled = true;
-    if (lastText && !section.hidden) {
+    if (currentMode === MODES.QR && lastText && !section.hidden) {
       drawQr(lastText, colorPicker.value || DEFAULT_BACKGROUND);
     }
   };
@@ -117,39 +133,128 @@
     }
   };
 
-  const generateQr = () => {
-    const rawText = input.value;
-    if (!rawText.trim()) {
-      lastText = "";
+  const drawBarcode = (text) => {
+    const ctx = canvas.getContext("2d", { alpha: false });
+    canvas.width = BARCODE_WIDTH;
+    canvas.height = BARCODE_HEIGHT;
+    ctx.imageSmoothingEnabled = false;
+
+    try {
+      JsBarcode(canvas, text, {
+        format: "CODE128",
+        displayValue: false,
+        margin: 0,
+        background: DEFAULT_BACKGROUND,
+        lineColor: DARK_COLOR,
+        width: 2,
+        height: BARCODE_LINE_HEIGHT,
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const renderOutput = () => {
+    if (!lastText.trim()) {
       setOutputVisible(false);
       return;
     }
 
-    lastText = rawText;
-    drawQr(rawText, colorPicker.value || DEFAULT_BACKGROUND);
+    if (currentMode === MODES.QR) {
+      drawQr(lastText, colorPicker.value || DEFAULT_BACKGROUND);
+      setOutputVisible(true);
+      setStatus("");
+      return;
+    }
+
+    if (!drawBarcode(lastText)) {
+      setOutputVisible(false);
+      setStatus("Barcode input not supported. Try a different value.");
+      return;
+    }
+
     setOutputVisible(true);
+    setStatus("");
   };
 
-  const downloadQr = () => {
+  const generateOutput = () => {
+    const rawText = input.value;
+    if (!rawText.trim()) {
+      lastText = "";
+      setOutputVisible(false);
+      setStatus("");
+      return;
+    }
+
+    lastText = rawText;
+    renderOutput();
+  };
+
+  const downloadOutput = () => {
     if (section.hidden) {
       return;
     }
 
     const link = document.createElement("a");
     link.href = canvas.toDataURL("image/png");
-    link.download = "qr-code.png";
+    link.download = currentMode === MODES.QR ? "qr-code.png" : "barcode.png";
     link.click();
   };
 
-  generateBtn.addEventListener("click", generateQr);
+  const setMode = (mode) => {
+    currentMode = mode;
+    const isBarcode = mode === MODES.BARCODE;
+
+    app.classList.toggle("is-barcode", isBarcode);
+    modeButtons.forEach((button) => {
+      const isActive = button.dataset.mode === mode;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
+
+    input.placeholder = isBarcode
+      ? " Enter text or numbers for barcode.."
+      : " Type anything here..";
+    input.setAttribute(
+      "aria-label",
+      isBarcode ? "Barcode content" : "QR content"
+    );
+    generateBtn.textContent = isBarcode ? "Generate Barcode" : "Generate QR Code";
+
+    colorPicker.disabled = isBarcode;
+    logoInput.disabled = isBarcode;
+    logoRemoveBtn.disabled = isBarcode || !logoImage;
+
+    if (isBarcode) {
+      clearLogo();
+    }
+
+    if (lastText) {
+      renderOutput();
+    } else {
+      setOutputVisible(false);
+    }
+  };
+
+  modeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextMode = button.dataset.mode;
+      if (nextMode && nextMode !== currentMode) {
+        setMode(nextMode);
+      }
+    });
+  });
+
+  generateBtn.addEventListener("click", generateOutput);
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      generateQr();
+      generateOutput();
     }
   });
   colorPicker.addEventListener("input", () => {
-    if (!lastText || section.hidden) {
+    if (currentMode !== MODES.QR || !lastText || section.hidden) {
       return;
     }
     drawQr(lastText, colorPicker.value || DEFAULT_BACKGROUND);
@@ -188,5 +293,8 @@
   logoRemoveBtn.addEventListener("click", () => {
     clearLogo();
   });
-  downloadBtn.addEventListener("click", downloadQr);
+  downloadBtn.addEventListener("click", downloadOutput);
+
+  setStatus("");
+  setMode(MODES.QR);
 })();
